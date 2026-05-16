@@ -1,0 +1,29 @@
+{
+  "name": "digital-clone-v3",
+  "version": "1.0.0",
+  "description": "> **Multi-agent AI system** s architekturoj OpenManus-style, multi-LLM routingom, MCP-protokolom i avtomatizaciej kontenta. Rabotajet 24/7: sozdajet posti, video, kod i analitiku.",
+  "main": "index.js",
+  "scripts": {
+    "remotion:preview": "remotion preview video/src/index.tsx",
+    "remotion:render": "remotion render video/src/index.tsx",
+    "remotion:studio": "remotion studio video/src/index.tsx",
+    "remotion:render-script": "ts-node video/src/render.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@remotion/cli": "^4.0.462",
+    "@remotion/renderer": "^4.0.462",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "remotion": "^4.0.462",
+    "typescript": "^6.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.19",
+    "ts-node": "^10.9.2"
+  }
+}

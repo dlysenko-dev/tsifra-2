@@ -1,0 +1,101 @@
+{
+  "tasks": [
+    {
+      "id": "morning_post",
+      "name": "Утренний пост",
+      "description": "Сгенерировать и опубликовать утренний пост про AI",
+      "schedule": {"type": "cron", "value": "0 9 * * *"},
+      "pipeline": ["generate_content", "quality_check", "publish", "log"],
+      "autonomy_level": 1,
+      "enabled": true,
+      "context": {
+        "topic": "AI автоматизация бизнеса",
+        "style": "экспертный",
+        "length": "средний",
+        "chat_id": "@your_channel"
+      }
+    },
+    {
+      "id": "evening_post",
+      "name": "Вечерний пост",
+      "description": "Сгенерировать и опубликовать вечерний пост про AI",
+      "schedule": {"type": "cron", "value": "0 18 * * *"},
+      "pipeline": ["generate_content", "quality_check", "publish", "log"],
+      "autonomy_level": 1,
+      "enabled": true,
+      "context": {
+        "topic": "тренды в AI и нейросетях",
+        "style": "разговорный",
+        "length": "средний",
+        "chat_id": "@your_channel"
+      }
+    },
+    {
+      "id": "video_shorts",
+      "name": "Шортсы",
+      "description": "Создать и опубликовать YouTube Shorts",
+      "schedule": {"type": "cron", "value": "0 12 */2 * *"},
+      "pipeline": ["generate_script", "generate_video", "publish_video", "log"],
+      "autonomy_level": 2,
+      "enabled": true,
+      "context": {
+        "topic": "AI инструменты",
+        "duration": 5,
+        "chat_id": "@your_channel"
+      }
+    },
+    {
+      "id": "trend_check",
+      "name": "Проверка трендов",
+      "description": "Мониторинг трендов в нише AI",
+      "schedule": {"type": "cron", "value": "0 */4 * * *"},
+      "pipeline": ["research_trends", "analyze", "report", "log"],
+      "autonomy_level": 1,
+      "enabled": true,
+      "context": {
+        "niche": "AI automation tools",
+        "chat_id": "@your_channel"
+      }
+    },
+    {
+      "id": "daily_report",
+      "name": "Ежедневный отчёт",
+      "description": "Формирование и отправка дневного отчёта по активности",
+      "schedule": {"type": "cron", "value": "0 21 * * *"},
+      "pipeline": ["analyze", "report", "log"],
+      "autonomy_level": 1,
+      "enabled": true,
+      "context": {
+        "chat_id": "@your_channel"
+      }
+    },
+    {
+      "id": "learning_loop",
+      "name": "Анализ метрик",
+      "description": "Анализ эффективности публикаций и корректировка стратегии",
+      "schedule": {"type": "cron", "value": "0 23 * * 0"},
+      "pipeline": ["analyze", "log"],
+      "autonomy_level": 2,
+      "enabled": true,
+      "context": {
+        "analysis_type": "weekly_metrics",
+        "chat_id": "@your_channel"
+      }
+    },
+    {
+      "id": "afternoon_tip",
+      "name": "Дневной лайфхак",
+      "description": "Короткий AI-лайфхак для аудитории",
+      "schedule": {"type": "cron", "value": "0 14 * * *"},
+      "pipeline": ["generate_content", "quality_check", "publish", "log"],
+      "autonomy_level": 2,
+      "enabled": false,
+      "context": {
+        "topic": "AI лайфхак для продуктивности",
+        "style": "короткий и цепляющий",
+        "length": "короткий",
+        "chat_id": "@your_channel"
+      }
+    }
+  ]
+}

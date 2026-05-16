@@ -1,0 +1,64 @@
+{
+  "telegram_post": {
+    "min_length": 100,
+    "max_length": 4000,
+    "requires_hook": true,
+    "requires_cta": true,
+    "max_hashtags": 5,
+    "requires_structure": true,
+    "min_hook_score": 6.0,
+    "min_engagement_score": 5.0,
+    "max_caps_ratio": 0.05,
+    "min_readability_score": 7.0
+  },
+  "shorts_script": {
+    "min_length": 200,
+    "max_length": 2000,
+    "requires_hook_3sec": true,
+    "requires_pauses": true,
+    "max_words": 180,
+    "words_per_minute": 150,
+    "target_duration_sec": 60,
+    "min_hook_score": 7.0,
+    "max_caps_ratio": 0.05,
+    "requires_cta": true
+  },
+  "blog_post": {
+    "min_length": 500,
+    "max_length": 10000,
+    "requires_structure": true,
+    "min_headers": 2,
+    "requires_hook": true,
+    "requires_cta": true,
+    "min_readability_score": 6.0,
+    "max_caps_ratio": 0.03,
+    "min_engagement_score": 5.0
+  },
+  "video_description": {
+    "min_length": 100,
+    "max_length": 5000,
+    "requires_structure": false,
+    "requires_hook": false,
+    "requires_cta": true,
+    "max_hashtags": 15,
+    "max_caps_ratio": 0.05,
+    "min_engagement_score": 4.0
+  },
+  "global": {
+    "auto_approve_threshold": 85,
+    "pass_threshold": 60,
+    "max_retry_attempts": 2,
+    "llm_timeout_sec": 30,
+    "max_toxicity_score": 0.3,
+    "min_llm_review_score": 6.0,
+    "max_repeated_char_ratio": 0.1,
+    "spam_link_patterns": [
+      "click here",
+      "buy now!!!",
+      "limited time only!!!",
+      "act now!!!",
+      "free money",
+      "earn $$$"
+    ]
+  }
+}

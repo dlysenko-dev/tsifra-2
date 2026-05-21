@@ -383,6 +383,13 @@ class MCPLayer:
             requires_approval=False,
         ))
 
+        # ── Blender VSE Video Editor ─────────────────────────────────
+        try:
+            from core.blender_vse.mcp_tools import register_blender_vse_tools
+            register_blender_vse_tools(self)
+        except Exception as exc:
+            print(f"[WARN] Blender VSE tools not registered: {exc}")
+
     # -- execution ---------------------------------------------------------
 
     async def execute(self, tool_name: str, params: Dict[str, Any]) -> MCPResult:

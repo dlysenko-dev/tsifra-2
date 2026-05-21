@@ -63,20 +63,23 @@ class VideoCreator:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.temp_dir.mkdir(parents=True, exist_ok=True)
 
-        # Asset Engine (Merzljakov-style)
+        # Asset Engine + Smart Asset Finder
         try:
             from core.asset_downloader import AssetDownloader
             from core.sound_library import SoundLibrary
             from core.video_assembler import VideoAssembler
+            from core.asset_finder import AssetFinder
             self._assets = AssetDownloader(output_dir=str(self.project_root / "assets"))
             self._sounds = SoundLibrary(library_dir=str(self.project_root / "assets" / "sounds"))
             self._assembler = VideoAssembler(output_dir=str(self.output_dir))
+            self._asset_finder = AssetFinder(output_dir=str(self.project_root / "assets"))
             self.has_asset_engine = True
         except Exception as e:
             print(f"[WARN] Asset Engine ne inicializirovan: {e}")
             self._assets = None
             self._sounds = None
             self._assembler = None
+            self._asset_finder = None
             self.has_asset_engine = False
 
         # Проверяем зависимости
@@ -113,6 +116,17 @@ class VideoCreator:
             self.has_node and 
             (remotion_cli.exists() or remotion_cli_win.exists())
         )
+
+        # Blender VSE Editor
+        try:
+            from core.blender_vse import BlenderVSEEditor
+            from core.blender_vse.styles import get_style
+            self._blender_vse = BlenderVSEEditor(output_dir=str(self.output_dir))
+            self.has_blender_vse = True
+        except Exception as e:
+            self._blender_vse = None
+            self.has_blender_vse = False
+            print(f"[WARN] Blender VSE Editor не инициализирован: {e}")
         
         if not self.has_ffmpeg:
             print("[WARN] ffmpeg ne najden. Ustanovi: https://ffmpeg.org/download.html")
@@ -144,6 +158,10 @@ class VideoCreator:
         """
         self.current_topic = topic
         print(f"\n[VIDEO] Video Creator: '{topic}' ({duration}s, {style})")
+
+        # Blender VSE — прямой вызов без сегментации
+        if style == "blender_vse":
+            return await self.create_video_blender_vse(topic, style="yoedit", duration=duration)
         
         project = VideoProject(topic=topic, total_duration=duration)
         
@@ -301,6 +319,127 @@ class VideoCreator:
         else:
             print(f"\n[FAIL] Asset Engine: {result}")
         return result
+
+    # ═══════════════════════════════════════════════
+    # Blender VSE Editor (новая система монтажа шортсов)
+    # ═══════════════════════════════════════════════
+
+    async def create_video_blender_vse(
+        self,
+        topic: str,
+        style: str = "yoedit",
+        duration: float = 15.0,
+        video_clips: Optional[List[str]] = None,
+        texts: Optional[List[Dict]] = None,
+    ) -> str:
+        """
+        Создать шорт через Blender VSE Video Editor.
+
+        Args:
+            topic: Тема ролика
+            style: Стиль монтажа (yoedit | gadzhi | merzliakov)
+            duration: Длительность в секундах
+            video_clips: Список путей к видео (если None — ищем через AssetFinder)
+            texts: Список текстовых блоков (если None — базовые)
+
+        Returns:
+            Путь к готовому MP4 файлу
+        """
+        if not self.has_blender_vse:
+            return "[ERROR] Blender VSE Editor недоступен"
+
+        from core.blender_vse.styles import get_style
+
+        print(f"\n[BLENDER VSE] Тема: '{topic}' | Стиль: {style} | {duration}s")
+
+        # Ищем клипы через AssetFinder если не переданы
+        if not video_clips:
+            if self._asset_finder:
+                print("  [ASSET] Поиск видео через AssetFinder...")
+                video_clips = await self._asset_finder.find_videos_for_topic(
+                    topic, style=style, count=4
+                )
+                print(f"  [ASSET] Найдено {len(video_clips)} клипов")
+            else:
+                video_clips = []
+
+        # Нет клипов = стоп. Не рендерим градиенты и цветные картинки.
+        if not video_clips:
+            error_msg = (
+                "[ERROR] Не найдены видео-клипы для монтажа. "
+                "Установи API ключи (PEXELS_API_KEY, PIXABAY_API_KEY) "
+                "или передай video_clips вручную."
+            )
+            print(f"[FAIL] {error_msg}")
+            return error_msg
+
+        # Ищем музыку под стиль
+        music_path = None
+        if self._asset_finder:
+            music_path = await self._asset_finder.find_music_for_topic(topic, style=style)
+            if music_path:
+                print(f"  [ASSET] Музыка: {music_path}")
+
+        # Базовые тексты если не переданы
+        if not texts:
+            texts = [
+                {"text": topic[:30].upper(), "start_frame": 1, "duration": int(duration * 30 * 0.5)},
+                {"text": "СМОТРИ ДО КОНЦА", "start_frame": int(duration * 30 * 0.5) + 1, "duration": int(duration * 30 * 0.5)},
+            ]
+
+        output_path = str(self.output_dir / f"short_{self._slug(topic)}_{style}_{int(duration)}s.mp4")
+
+        try:
+            editor = self._blender_vse
+            editor.create_project(width=1080, height=1920, fps=30, duration_frames=int(duration * 30))
+
+            # Добавляем музыку если нашли
+            if music_path and Path(music_path).exists():
+                try:
+                    editor.add_sound(music_path, channel=2, frame_start=1)
+                except Exception as e:
+                    print(f"  [WARN] Не удалось добавить музыку: {e}")
+
+            style_obj = get_style(style, editor=editor)
+            result = style_obj.create_short(
+                video_clips=video_clips,
+                texts=texts,
+                output_path=output_path,
+                width=1080,
+                height=1920,
+                fps=30,
+            )
+
+            print(f"\n[DONE] Blender VSE short: {result}")
+            return result
+        except Exception as exc:
+            print(f"[FAIL] Blender VSE error: {exc}")
+            return f"[ERROR] {exc}"
+
+    async def _generate_placeholder_clips(self, duration: float) -> List[str]:
+        """Сгенерировать placeholder MP4 через ffmpeg."""
+        clips = []
+        if not self.has_ffmpeg:
+            return clips
+        try:
+            import subprocess
+            from pathlib import Path
+            out_dir = self.temp_dir / "placeholders"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            colors = ["black", "darkblue", "red"]
+            seg_dur = max(2.0, duration / len(colors))
+            for color in colors:
+                path = out_dir / f"placeholder_{color}.mp4"
+                if not path.exists():
+                    subprocess.run([
+                        "ffmpeg", "-y", "-f", "lavfi", "-i",
+                        f"color=c={color}:s=1080x1920:d={seg_dur}",
+                        "-pix_fmt", "yuv420p", "-an", str(path)
+                    ], check=True, capture_output=True)
+                clips.append(str(path))
+        except Exception as e:
+            print(f"[WARN] Не удалось создать placeholder: {e}")
+        return clips
 
     # ═══════════════════════════════════════════════
     # ShAG 1: Planirovanije segmentov
@@ -1065,7 +1204,21 @@ export default defineConfig({{ plugins: [motionCanvas()] }});
     # ═══════════════════════════════════════════════
 
     async def _fallback_video(self, topic: str, duration: float, work_dir: Path) -> str:
-        """Fallback: стильное видео с анимированным градиентом и частицами."""
+        """Fallback: Blender VSE если доступен, иначе стильное видео с анимированным градиентом."""
+        # Fallback 1: Blender VSE Editor
+        if self.has_blender_vse:
+            try:
+                result = await self.create_video_blender_vse(
+                    topic=topic,
+                    style="yoedit",
+                    duration=duration,
+                )
+                if result and not result.startswith("[ERROR]"):
+                    return result
+            except Exception as exc:
+                print(f"[WARN] Blender VSE fallback failed: {exc}")
+
+        # Fallback 2: анимированный градиент через PIL
         import math
         try:
             from PIL import Image, ImageDraw, ImageFont, ImageFilter

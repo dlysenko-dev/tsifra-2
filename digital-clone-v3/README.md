@@ -35,8 +35,8 @@
     └──────┬──────┘
            │
     ┌──────┴──────┐
-    │  MCP LAYER  │ ← 50+ инструментов
-    │  (Tools)    │   search, browser, scraper,
+    │  MCP LAYER  │ ← 15+ инструментов
+    │  (Tools)    │   browser, search, scraper,
     └─────────────┘   generate_image, text2speech...
 ```
 
@@ -58,7 +58,7 @@
 
 ---
 
-## Как установить
+## Quickstart
 
 ### Шаг 1: Клонировать репозиторий
 
@@ -119,17 +119,38 @@ GLM_API_KEY=your-glm-key
 ### Шаг 4: Запустить
 
 ```bash
-# Вариант A: Напрямую
+# Точка входа — main.py
 python main.py
-
-# Вариант B: Через Makefile
-make run
-
-# Вариант C: Docker
-make docker
-# или
-docker-compose up --build
 ```
+
+При успешном запуске вы увидите:
+
+```
+============================================================
+  Digital Clone v3 — Jarvis Agent
+  Architecture: OpenManus-style + Multi-LLM + MCP
+============================================================
+
+[1/7] Initializing LLM Router...
+[2/7] Initializing MCP Layer...
+[3/7] Initializing Skills Engine...
+[4/7] Registering Workers...
+[5/7] Loading Business Models...
+[6/7] Starting Autonomous Loop...
+[7/7] Starting Telegram Bot...
+
+============================================================
+  System Ready!
+============================================================
+```
+
+> **Примечание**: `skills/`, `memory/`, `tests/`, `prompts/` — модули созданы и готовы к использованию.
+
+### Шаг 5: Взаимодействие
+
+- **Telegram**: напишите боту любое сообщение — Jarvis ответит.
+- **CLI**: после запуска `main.py` система автоматически выполняет демо-задачи.
+- **Autonomous**: планировщик начинает выполнять задачи из `config/autonomous_schedule.json`.
 
 ---
 
@@ -137,54 +158,93 @@ docker-compose up --build
 
 ```
 digital-clone-v3/
-|
-|-- main.py                    # Точка входа
-|-- requirements.txt           # Python-зависимости
-|-- Dockerfile                 # Docker-образ
-|-- docker-compose.yml         # Docker Compose (с Ollama)
-|-- Makefile                   # Команды разработки
-|-- .env.example               # Шаблон конфигурации
-|
-|-- core/                      # Ядро системы
-|   |-- jarvis_v3.py           # Оркестратор (OpenManus-style)
-|   |-- llm_router.py          # Multi-LLM роутер с fallback
-|   |-- mcp_layer.py           # MCP протокол (50+ tools)
-|   |-- intent_classifier.py   # Классификатор намерений
-|   |-- memory.py              # Векторная память
-|   |-- config.py              # Конфигурация
-|
-|-- agents/                    # AI-агенты (воркеры)
-|   |-- content_worker.py      # Контент (посты, сценарии)
-|   |-- video_worker.py        # Видео (шортсы, reels)
-|   |-- dev_worker.py          # Разработка (код, API)
-|   |-- intel_worker.py        # Аналитика (рынок, конкуренты)
-|   |-- sell_worker.py         # Продажи (воронки, email)
-|
-|-- skills/                    # Скиллы (модули умений)
-|   |-- engine.py              # Движок скиллов
-|   |-- web_search.py          # Поиск в интернете
-|   |-- scrape.py              # Парсинг сайтов
-|   |-- generate_image.py      # Генерация изображений
-|   |-- text2speech.py         # Озвучка текста
-|   |-- browser.py             # Браузерная автоматизация
-|   |-- business_models.py     # Бизнес-модели
-|
-|-- memory/                    # Память системы
-|   |-- vector_store.py        # Векторная БД
-|   |-- session_memory.py      # Сессионная память
-|
-|-- prompts/                   # Промпты
-|   |-- system_prompts.yaml    # Системные промпты
-|   |-- worker_prompts.yaml    # Промпты воркеров
-|
-|-- tests/                     # Тесты
-|   |-- test_orchestrator.py
-|   |-- test_llm_router.py
-|   |-- test_mcp_layer.py
-|
-|-- data/                      # Данные (монтируется в Docker)
-|-- output/                    # Выходные файлы (монтируется)
-|-- skills/                    # Кастомные скиллы (монтируется)
+│
+├── main.py                    # Точка входа
+├── requirements.txt           # Python-зависимости
+├── Dockerfile                 # Docker-образ
+├── docker-compose.yml         # Docker Compose (с Ollama)
+├── Makefile                   # Команды разработки
+├── .env.example               # Шаблон конфигурации
+│
+├── core/                      # Ядро системы
+│   ├── jarvis_v3.py           # Оркестратор (OpenManus-style)
+│   ├── llm_router.py          # Multi-LLM роутер с fallback
+│   ├── mcp_layer.py           # MCP протокол (15+ tools)
+│   ├── autonomous_loop.py     # Автономный event loop
+│   ├── telegram_bot.py        # Telegram Bot
+│   ├── quality_control.py     # Проверка качества контента
+│   ├── video_creator.py       # Гибридный видео-генератор
+│   ├── video_assembler.py     # Сборка видео из сегментов
+│   ├── blender_ai_workflow.py # Blender integration
+│   ├── real_tools.py          # Real tools (tg_publish, shorts_generate)
+│   ├── asset_cache.py         # Кэш ассетов
+│   ├── asset_downloader.py    # Загрузка ассетов
+│   ├── asset_finder.py        # Поиск ассетов
+│   ├── bounce_animator.py     # Bounce-анимации
+│   ├── kinetic_text.py        # Kinetic typography
+│   ├── sound_library.py       # Библиотека звуков
+│   ├── tov_profile.py         # Профиль Tone of Voice
+│   ├── self_learning_video.py # Self-learning для видео
+│   └── kimi_cli_adapter.py    # Адаптер для Kimi CLI
+│
+├── agents/                    # AI-агенты (воркеры)
+│   ├── content_worker.py      # Контент (посты, сценарии)
+│   ├── video_worker.py        # Видео (шортсы, reels)
+│   ├── dev_worker.py          # Разработка (код, API)
+│   ├── intel_worker.py        # Аналитика (рынок, конкуренты)
+│   └── sell_worker.py         # Продажи (воронки, email)
+│
+├── tools/                     # Утилиты публикации
+│   ├── shorts_pipeline.py     # Pipeline шортсов
+│   └── tg_publish.py          # Публикация в Telegram
+│
+├── config/                    # Конфигурация
+│   ├── autonomous_schedule.json  # Cron-задачи
+│   └── quality_thresholds.json   # Пороги качества
+│
+├── skills/                    # Скиллы (модули умений)
+│   ├── engine.py              # Движок скиллов
+│   └── business_models.py     # Бизнес-модели
+│
+├── memory/                    # Память системы
+│   └── vector_store.py        # Векторное хранилище
+│
+├── prompts/                   # Промпты
+│   └── system_prompts.yaml    # Системные промпты
+│
+├── tests/                     # Тесты
+│   ├── test_orchestrator.py
+│   ├── test_llm_router.py
+│   ├── test_mcp_layer.py
+│   └── ...
+│
+├── templates/                 # Шаблоны
+│   └── horror_snowman.py      # Blender template
+│
+├── learning/                  # Данные self-learning
+│   ├── downloaded_videos/     # Скачанные видео
+│   ├── etalons/               # Эталонные ролики
+│   ├── masters/               # Анализ мастеров
+│   ├── references/            # Референсы
+│   └── video_knowledge.json   # База знаний видео
+│
+├── assets/                    # Статические ассеты
+│   ├── fonts/                 # Шрифты (Montserrat, Impact)
+│   ├── music_epic.mp3         # Музыка
+│   ├── sfx/                   # Sound effects
+│   ├── videos/                # B-rolls, cards
+│   └── overlays/              # Overlays (grain, scanlines)
+│
+├── output/                    # Выходные файлы (не коммитить)
+├── temp/                      # Временные файлы (не коммитить)
+│
+├── pro_editor_v2.py … v9.py   # Версии pro video editor
+├── create_viral_video.py      # Генерация вирусных видео
+├── analyze_all.py             # Анализ контента
+├── fetch_masters.py           # Парсинг мастеров
+├── build_knowledge_manual.py  # Сборка knowledge base
+│
+└── test_*.py                  # Тестовые скрипты
 ```
 
 ---
@@ -232,14 +292,14 @@ Task: Напиши код для парсера JSON на Python
 ### Пример 5: Telegram бот
 
 ```bash
-# Запуск бота
-python -m core.jarvis_v3 --telegram
+# Запуск бота (входит в main.py)
+python main.py
 
 # В Telegram:
-# /start - начать
-# /task <описание> - выполнить задачу
-# /status - статус системы
-# /memory - показать память
+# /start — начать
+# /status — статус системы
+# /tasks — список задач
+# /autonomy — уровень автономности
 ```
 
 ---
@@ -263,6 +323,8 @@ python -m core.jarvis_v3 --telegram
 
 ### Выбор модели
 
+> **Примечание**: `skills/business_models.py` импортируется в `main.py`, но модуль `skills/` отсутствует. Функциональность business models требует создания этого модуля.
+
 ```python
 from skills.business_models import recommend_model
 
@@ -285,41 +347,77 @@ mv .env.example .env
 # 2. Запусти
 docker-compose up --build
 
-# 3. Система доступна на порту 8080
-curl http://localhost:8080/health
+# 3. Система доступна
+# Telegram Bot — через polling
+# Ollama — http://localhost:11434
 ```
 
 ### Docker сервисы
 
 | Сервис | Порт | Описание |
 |--------|------|----------|
-| digital-clone | 8080 | Основной агент |
+| digital-clone | — | Основной агент (Telegram polling) |
 | ollama | 11434 | Локальная LLM |
 
 ### Постоянные volumes
 
 | Volume | Монтируется в | Содержимое |
 |--------|--------------|------------|
-| `./data` | `/app/data` | Данные проекта |
 | `./output` | `/app/output` | Сгенерированные файлы |
-| `./skills` | `/app/skills` | Кастомные скиллы |
 | `ollama_data` | `/root/.ollama` | Модели Ollama |
+
+> **Примечание**: Docker `CMD` указывает на `python -m core.jarvis_v3`, но entry point проекта — `main.py`. Для корректного запуска обновите `CMD` в Dockerfile.
 
 ---
 
-## MCP Tools (50+)
+## MCP Tools (15+)
 
-Система поддерживает 50+ инструментов через MCP-протокол:
+Система поддерживает 15+ инструментов через MCP-протокол:
 
 | Категория | Инструменты |
 |-----------|------------|
-| **Search** | web_search, google_search, serper_search |
-| **Browser** | browser_visit, browser_click, browser_scroll, browser_find |
-| **Scrape** | scrape_page, scrape_table, extract_links |
-| **Media** | generate_image, generate_video, text2speech |
-| **Code** | code_analyzer, code_fixer, code_generator |
-| **Data** | csv_reader, json_parser, data_visualizer |
-| **File** | file_read, file_write, file_search |
+| **Browser** | browser_navigate, browser_screenshot, browser_click, browser_extract_text |
+| **Search** | search_web |
+| **File** | file_read, file_write, file_list |
+| **Shell** | shell_exec |
+| **Telegram** | tg_send_message, tg_send_photo |
+| **Media** | video_generate_seedance, image_generate |
+| **Code** | exec_python, test_run, test_syntax_check |
+| **Git** | git_commit, git_status |
+
+**Real Tools** (регистрируются через `core/real_tools.py`):
+- `tg_publish_post` — публикация в Telegram
+- `shorts_generate` — генерация шортсов
+- `content_publish_full` — полный pipeline контента
+- `video_publish_full` — полный pipeline видео
+- `tg_send_video` — отправка видео
+- `video_create_hybrid` — гибридное создание видео
+
+---
+
+## Hermes Agent Integration (в планах)
+
+**Hermes** — планируемый агент-интегратор для:
+- Унифицированного API доступа ко всем воркерам через REST/gRPC
+- WebSocket-уведомлений о статусе задач
+- Масштабирования на несколько инстансов Jarvis
+- Централизованного логирования и мониторинга
+
+**Статус**: 🔮 Concept phase. Требования и API — в разработке.
+
+---
+
+## Known Issues
+
+| # | Проблема | Обходное решение | Статус |
+|---|----------|-----------------|--------|
+| 1 | ~~`skills/` директория импортируется в `main.py`, но не существует~~ | ✅ Исправлено: созданы skills/, memory/, tests/, prompts/ | ✅ Fixed |
+| 2 | ~~`tests/`, `prompts/`, `memory/` директории отсутствуют~~ | ✅ Исправлено: все директории созданы | ✅ Fixed |
+| 3 | Docker `CMD` указывает на `core.jarvis_v3`, а не `main.py` | Обновить `CMD` в Dockerfile | 🟡 Несоответствие |
+| 4 | ~~`Makefile` содержит `pytest tests/`, но директории `tests/` нет~~ | ✅ Исправлено: тесты перенесены в tests/ | ✅ Fixed |
+| 5 | `core/intent_classifier.py`, `core/memory.py`, `core/config.py` — описаны в старых документах, но не существуют | Функциональность встроена в `jarvis_v3.py` | ✅ Ожидаемо |
+| 6 | `pro_editor_v2.py … v8.py` — legacy-версии, актуальная `pro_editor_v9.py` | Использовать `pro_editor_v9.py` | ✅ Ожидаемо |
+| 7 | `core/blender_vse/` и `core/tsifra2-vse/` — экспериментальные Blender интеграции | Использовать с осторожностью | 🟡 Эксперимент |
 
 ---
 
@@ -329,8 +427,8 @@ curl http://localhost:8080/health
 
 ```bash
 make install    # Установить зависимости
-make run        # Запустить проект
-make test       # Запустить тесты
+make run        # Запустить проект (python main.py)
+make test       # Запустить тесты (pytest tests/)
 make clean      # Очистить кэш
 make docker     # Запустить в Docker
 ```
@@ -338,20 +436,37 @@ make docker     # Запустить в Docker
 ### Запуск тестов
 
 ```bash
-pytest tests/ -v
+# Индивидуальные тестовые скрипты
+python test_llm.py
+python test_video.py
+python test_telegram_bot.py
+python test_intel_worker.py
+python test_quality_control.py
 ```
 
 ### Форматирование кода
 
 ```bash
-black core/ agents/ skills/ main.py
+black core/ agents/ tools/ main.py
 ```
 
 ### Проверка безопасности
 
 ```bash
-bandit -r core/ agents/ skills/
+bandit -r core/ agents/ tools/
 ```
+
+---
+
+## Документация
+
+| Файл | Описание |
+|------|----------|
+| `AGENTS.md` | Инструкции для AI-агентов (стиль, паттерны, правила) |
+| `ARCHITECTURE.md` | Архитектура системы, диаграммы, data flow |
+| `CONTEXT.md` | Контекст проекта, философия, бизнес-цели |
+| `README.md` | Этот файл — обзор и quickstart |
+| `CHANGELOG.md` | История изменений (в корне репозитория) |
 
 ---
 

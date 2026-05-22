@@ -1,17 +1,45 @@
-.PHONY: install run test clean docker
+# Digital Clone v3 — Makefile
+# ============================
+
+.PHONY: install run test lint format clean docker
+
+PYTHON := python3
+PIP := pip3
 
 install:
-	pip install -r requirements.txt
+	$(PIP) install -r requirements.txt
 	playwright install chromium
 
 run:
-	python main.py
+	$(PYTHON) main.py
 
 test:
 	pytest tests/ -v
 
+test-cov:
+	pytest tests/ --cov=. --cov-report=html
+
+lint:
+	ruff check .
+	bandit -r core/ agents/ skills/ memory/
+
+format:
+	black core/ agents/ skills/ memory/ tests/ main.py
+	ruff check --fix .
+
 clean:
-	rm -rf __pycache__ .pytest_cache
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete
+	find . -type f -name "*.pyo" -delete
+	rm -rf .pytest_cache/ .coverage htmlcov/
 
 docker:
 	docker-compose up --build
+
+docker-down:
+	docker-compose down
+
+# Security check
+security:
+	bandit -r core/ agents/ skills/ memory/ -f json -o bandit-report.json
+	@echo "Security report: bandit-report.json"

@@ -27,6 +27,7 @@ from core.llm_router import LLMRouter
 from core.mcp_layer import MCPLayer
 from core.autonomous_loop import AutonomousLoop
 from core.telegram_bot import JarvisTelegramBot
+from core.hermes_bridge import HermesBridge
 from agents.content_worker import ContentWorker
 from agents.video_worker import VideoWorker
 from agents.dev_worker import DevWorker
@@ -95,15 +96,29 @@ async def main():
     for m in models:
         print(f"      - {m['name']}: {m['revenue_potential']}")
 
-    # 6. Zapusk Autonomous Loop
-    print("\n[6/7] Starting Autonomous Loop...")
+    # 6. Inicializaciya Hermes Bridge
+    print("\n[6/8] Initializing Hermes Bridge...")
+    hermes_bin = Path.home() / "AppData" / "Local" / "hermes" / "hermes-agent" / "venv" / "Scripts" / "hermes.exe"
+    hermes = HermesBridge(config={"hermes_bin": str(hermes_bin)})
+    hermes_connected = await hermes.connect()
+    if hermes_connected:
+        print("      Hermes: CONNECTED")
+        hermes_health = await hermes.health_check()
+        print(f"      Version: {hermes_health.get('hermes_version', 'unknown')}")
+        # Peredaem Hermes v orchestrator
+        jarvis.bind_hermes(hermes)
+    else:
+        print("      Hermes: NOT FOUND (optional)")
+
+    # 7. Zapusk Autonomous Loop
+    print("\n[7/8] Starting Autonomous Loop...")
     loop = AutonomousLoop(jarvis)
     schedule_path = PROJECT_ROOT / "config" / "autonomous_schedule.json"
     tasks_loaded = await loop.load_schedule(str(schedule_path))
     print(f"      Scheduled tasks: {tasks_loaded}")
 
-    # 7. Zapusk Telegram Bot
-    print("\n[7/7] Starting Telegram Bot...")
+    # 8. Zapusk Telegram Bot
+    print("\n[8/8] Starting Telegram Bot...")
     bot = JarvisTelegramBot(jarvis=jarvis)
     if bot.token:
         print(f"      Bot token: {bot.token[:10]}...")
@@ -112,7 +127,7 @@ async def main():
     else:
         print("      WARNING: TG_BOT_TOKEN not set, bot will not start")
 
-    # 8. Finalniy status
+    # 9. Finalniy status
     print("\n" + "=" * 60)
     print("  System Ready!")
     print("=" * 60)
@@ -123,6 +138,7 @@ async def main():
     print(f"  - Workers: {len(workers)}")
     print(f"  - Business Models: {len(models)}")
     print(f"  - Autonomous Tasks: {tasks_loaded}")
+    print(f"  - Hermes Bridge: {'YES' if hermes_connected else 'NO'}")
     print(f"  - Telegram Bot: {'YES' if bot.token else 'NO'}")
 
     # Zapuskaem demo-zadachi + autonomous loop odnovremenno

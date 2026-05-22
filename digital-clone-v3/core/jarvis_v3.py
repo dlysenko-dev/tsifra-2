@@ -207,6 +207,7 @@ class JarvisOrchestrator:
         self.llm_router: Optional[Any] = None
         self.mcp_layer: Optional[Any] = None
         self.memory: Optional[Any] = None
+        self.hermes: Optional[Any] = None
 
     # -- autonomy & escalation ---------------------------------------------
 
@@ -273,6 +274,10 @@ class JarvisOrchestrator:
     def bind_memory(self, memory: Any) -> None:
         """Подключить интерфейс памяти (Obsidian / векторная БД)."""
         self.memory = memory
+
+    def bind_hermes(self, hermes: Any) -> None:
+        """Подключить Hermes Bridge для мессенджинга, памяти и планирования."""
+        self.hermes = hermes
 
     # -- public API --------------------------------------------------------
 
@@ -589,10 +594,7 @@ class JarvisOrchestrator:
         return {"error": "Max retries exceeded", "task_id": task.id, "last_error": task.error}
 
     async def _persist_to_memory(self, task: Task) -> None:
-        """Сохранить результат задачи в векторную память / Obsidian."""
-        if self.memory is None:
-            return
-
+        """Сохранить результат задачи в память (локальную и/или Hermes)."""
         memory_entry = {
             "task_id": task.id,
             "intent": task.intent.value,
@@ -601,11 +603,26 @@ class JarvisOrchestrator:
             "status": task.status.value,
             "timestamp": task.completed_at,
         }
-        # Интерфейс памяти — async add / save
-        if hasattr(self.memory, "add"):
-            await self.memory.add(memory_entry)
-        elif hasattr(self.memory, "save"):
-            await self.memory.save(memory_entry)
+
+        # Локальная память
+        if self.memory is not None:
+            if hasattr(self.memory, "add"):
+                await self.memory.add(memory_entry)
+            elif hasattr(self.memory, "save"):
+                await self.memory.save(memory_entry)
+
+        # Hermes память
+        if self.hermes is not None:
+            try:
+                summary = f"Task {task.id} ({task.intent.value}): {task.description}"
+                if task.result:
+                    summary += f" | Result: {str(task.result)[:200]}"
+                await self.hermes.save_to_memory(
+                    content=summary,
+                    metadata=memory_entry,
+                )
+            except Exception:
+                pass  # Hermes memory опциональна
 
     # -- query helpers -----------------------------------------------------
 

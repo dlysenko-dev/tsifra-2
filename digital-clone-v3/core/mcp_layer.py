@@ -12,6 +12,7 @@ MCP (Model Context Protocol) Layer v3
 from __future__ import annotations
 
 import asyncio
+import inspect
 import json
 import os
 import subprocess
@@ -427,7 +428,7 @@ class MCPLayer:
             params["_requires_approval"] = True
 
         try:
-            if asyncio.iscoroutinefunction(tool.handler):
+            if inspect.iscoroutinefunction(tool.handler):
                 result = await tool.handler(**params)
             else:
                 result = tool.handler(**params)

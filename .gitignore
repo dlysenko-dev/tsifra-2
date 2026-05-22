@@ -39,3 +39,27 @@ output/
 # Large media / training data
 digital-clone-v3/learning/
 
+# Logs
+*.log
+
+# pytest / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Build artifacts
+dist/
+build/
+
+# Python packaging
+.eggs/
+*.egg-info/
+
+# Type checking / linting caches
+.mypy_cache/
+.ruff_cache/
+
+# Secrets (defense in depth)
+secrets.yaml
+secrets.json
+credentials.json
